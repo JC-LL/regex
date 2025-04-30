@@ -19,14 +19,15 @@ module Regex
 
     def gen state
       dot=Code.new
+      return if @printed.include?(self)
       state.transitions.each do |transition|
         cond,next_state=transition
         cond= (cond==:epsilon) ? "\u03b5": "'#{cond}'"
         dot << "#{state.id} -> #{next_state.id} [label=\"#{cond}\"]"
+        @printed << state
         unless @printed.include?(next_state)
           dot << gen(next_state)
         end
-        @printed << state
       end
       dot
     end

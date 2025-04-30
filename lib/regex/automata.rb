@@ -13,13 +13,14 @@ module Regex
 
     def print
       @printed||=[]
+      return if @printed.include?(self)
       @transitions.each do |transition|
         cond,next_state=transition
         puts "#{self.id} -#{cond}-> #{next_state.id}"
+        @printed << self
         unless @printed.include?(next_state)
           next_state.print
         end
-        @printed << self
       end
     end
   end

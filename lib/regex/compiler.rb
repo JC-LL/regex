@@ -29,9 +29,9 @@ module Regex
       nfa=NFA.new
       current_state=nfa.starter
       seq.exprs.each do |expr|
-        fsm_expr=expr.accept(self)
-        current_state.to(fsm_expr.starter)
-        current_state=fsm_expr.ender
+        nfa_expr=expr.accept(self)
+        current_state.to(nfa_expr.starter)
+        current_state=nfa_expr.ender
       end
       ender=nfa.terminate # creates @ender
       current_state.to(ender)
@@ -42,54 +42,68 @@ module Regex
       nfa=NFA.new
       ender=nfa.terminate # creates @ender
       alt.exprs.each do |expr|
-        fsm_expr=expr.accept(self)
-        nfa.starter.to(fsm_expr.starter)
-        fsm_expr.ender.to(ender)
+        nfa_expr=expr.accept(self)
+        nfa.starter.to(nfa_expr.starter)
+        nfa_expr.ender.to(ender)
       end
       nfa
     end
 
-
     def visitStar star,args=nil
-      fsm=NFA.new
+      nfa=NFA.new
+      starter=nfa.starter
+      ender=nfa.terminate # creates @ender
+      nfa_expr=star.expr.accept(self)
+      starter.to(nfa_expr.starter)
+      nfa_expr.ender.to(nfa_expr.starter)
+      nfa_expr.ender.to(ender)
+      starter.to(ender)
+      nfa
     end
 
     def visitPlus plus,args=nil
-      fsm=NFA.new
+      nfa=NFA.new
+      starter=nfa.starter
+      ender=nfa.terminate # creates @ender
+      nfa_expr=star.expr.accept(self)
+      starter.to(nfa_expr.starter)
+      nfa_expr.ender.to(nfa_expr.starter)
+      nfa_expr.ender.to(ender)
+      nfa
     end
 
     def visitOpt opt,args=nil
-      fsm=NFA.new
+      nfa=NFA.new
     end
 
     def visitRepeat repeat,args=nil
-      fsm=NFA.new
+      nfa=NFA.new
     end
 
     def visitGroup group,args=nil
-      fsm=NFA.new
+      nfa=NFA.new
     end
 
     def visitNonCapturingGroup nc_group,args=nil
-      fsm=NFA.new
+      nfa=NFA.new
     end
 
     def visitAnyof any_of,args=nil
-      fsm=NFA.new
+      nfa=NFA.new
     end
 
     def visitStartAnchor start_anchor,args=nil
-      fsm=NFA.new
-      fsm.ender=State.new(:ender)
-      fsm.starter.to_on(fsm.ender,start_anchor.to_regex)
-      fsm
+      nfa=NFA.new
+      nfa.ender=State.new(:ender)
+      nfa.starter.to_on(nfa.ender,start_anchor.to_regex)
+      nfa
     end
 
     def visitEndAnchor end_anchor,args=nil
-      fsm=NFA.new
-      fsm.ender=State.new(:ender)
-      fsm.starter.to_on(fsm.ender,end_anchor.to_regex)
-      fsm
+      nfa=NFA.new
+      nfa.ender=State.new(:ender)
+      nfa.starter.to_on(nfa.ender,end_anchor.to_regex)
+      nfa
     end
   end
 end
