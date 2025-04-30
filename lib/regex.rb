@@ -1,3 +1,6 @@
 require_relative "./regex/ast"
 require_relative "./regex/parser"
+require_relative "./regex/compiler"
+require_relative "./regex/automata"
 require_relative "./regex/ast_drawer"
+require_relative "./regex/dot_drawer"

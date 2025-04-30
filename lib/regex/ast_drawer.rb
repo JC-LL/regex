@@ -34,14 +34,12 @@ module Regex
     end
 
     def process node
-      puts "processing #{node}"
       code=Code.new
       source=id(node)
       label=node.class.to_s.split("::").last
       code << "#{source}[label=\"#{label}\"]"
 
       node.instance_variables.each do |vname|
-        p vname
         ivar=node.instance_variable_get(vname)
         if @printed.include?(ivar)
           ivar=ivar.clone

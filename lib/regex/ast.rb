@@ -1,43 +1,50 @@
 # Classes représentant les nœuds de l'AST
 module Regex
   module AST
-    class Literal
+    class AstNode
+      def accept(visitor, arg=nil)
+       name = self.class.name.split(/::/).last
+       visitor.send("visit#{name}".to_sym, self ,arg) # Metaprograming !
+     end
+    end
+
+    class Literal < AstNode
       attr_reader :char
       def initialize(char) = @char = char
       def to_regex = Regexp.escape(char)
     end
 
-    class Alt
+    class Alt < AstNode
       attr_reader :exprs
       def initialize(*exprs) = @exprs = exprs
       def to_regex = exprs.map(&:to_regex).join("|")
     end
 
-    class Seq
+    class Seq < AstNode
       attr_reader :exprs
       def initialize(*exprs) = @exprs = exprs
       def to_regex = exprs.map(&:to_regex).join
     end
 
-    class Star
+    class Star < AstNode
       attr_reader :expr
       def initialize(expr) = @expr = expr
       def to_regex = "#{expr.to_regex}*"
     end
 
-    class Plus
+    class Plus < AstNode
       attr_reader :expr
       def initialize(expr) = @expr = expr
       def to_regex = "#{expr.to_regex}+"
     end
 
-    class Opt
+    class Opt < AstNode
       attr_reader :expr
       def initialize(expr) = @expr = expr
       def to_regex = "#{expr.to_regex}?"
     end
 
-    class Repeat
+    class Repeat < AstNode
       attr_reader :min, :max, :expr
       def initialize(min, max, expr)
         @min = min
@@ -49,19 +56,19 @@ module Regex
       end
     end
 
-    class Group
+    class Group  < AstNode
       attr_reader :expr
       def initialize(expr) = @expr = expr
       def to_regex = "(#{expr.to_regex})"
     end
 
-    class NonCapturingGroup
+    class NonCapturingGroup  < AstNode
       attr_reader :expr
       def initialize(expr) = @expr = expr
       def to_regex = "(?:#{expr.to_regex})"
     end
 
-    class AnyOf
+    class AnyOf  < AstNode
      attr_reader :chars
      def initialize(*chars)
        @chars = chars.flatten
@@ -73,7 +80,7 @@ module Regex
      end
     end
 
-    class Range
+    class Range < AstNode
       attr_reader :from, :to
       def initialize(from, to)
         @from = from
@@ -86,29 +93,30 @@ module Regex
     end
 
     # Ancres
-    class StartAnchor      # ^ (début de ligne)
-      def to_regex = '^'
+    class StartAnchor  < AstNode
+      def to_regex = '^' # ^ (début de ligne)
     end
 
-    class AbsoluteStart    # \A (début absolu de chaîne)
+    class AbsoluteStart < AstNode
       def to_regex = '\A'
     end
 
     # Ancres de fin
-    class EndAnchor         # $
+    class EndAnchor  < AstNode
       def to_regex = '$'
     end
 
-    class AbsoluteEnd       # \z
+    class AbsoluteEnd < AstNode
       def to_regex = '\z'
     end
 
-    class WordBoundary      # \b (peut aussi être utilisé pour "début de mot")
+    class WordBoundary < AstNode
+      # \b (peut aussi être utilisé pour "début de mot")
       def to_regex = '\b'
     end
 
     # Classe de caractères exclus ([^...])
-    class Not
+    class Not  < AstNode
       attr_reader :chars
       def initialize(*chars)
         @chars = chars.flatten
@@ -116,11 +124,11 @@ module Regex
       def to_regex = "[^#{chars.map(&:to_regex).join}]"
     end
 
-    class Boundary
+    class Boundary  < AstNode
       def to_regex = '\b'
     end
 
-    class PredefinedClass
+    class PredefinedClass  < AstNode
       PREDEFINED = {
         digit: '\d',
         word:  '\w',

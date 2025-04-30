@@ -37,7 +37,7 @@ module Regex
       when 'end'       then EndAnchor.new        # $
       when 'abs-end'   then AbsoluteEnd.new      # \z
       when 'word-end'  then WordBoundary.new     # \b
-      when 'or'        then Alt.new(*args.map{|a| build_ast(a)})
+      when 'alt'       then Alt.new(*args.map{|a| build_ast(a)})
       when 'seq'       then Seq.new(*args.map { |a| build_ast(a) })
       when 'star'      then Star.new(build_ast(args[0]))
       when 'plus'      then Plus.new(build_ast(args[0]))
