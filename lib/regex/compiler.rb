@@ -74,6 +74,13 @@ module Regex
 
     def visitOpt opt,args=nil
       nfa=NFA.new
+      starter=nfa.starter
+      ender=nfa.terminate # creates @ender
+      nfa_expr=opt.expr.accept(self)
+      starter.to(nfa_expr.starter)
+      nfa_expr.ender.to(ender)
+      starter.to(ender)
+      nfa
     end
 
     def visitRepeat repeat,args=nil
